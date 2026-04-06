@@ -17,7 +17,7 @@ function StatCard({ label, value, sub, color = 'text-[#4ade80]' }) {
 
 export default function VerificationReport() {
   const {
-    baseUrl, secretKey, finalResults, progress, errors, transformedData,
+    baseUrl, instanceName, secretKey, finalResults, progress, errors, transformedData,
     verificationResults, setVerificationResults, setPage
   } = useImportStore();
 
@@ -34,7 +34,14 @@ export default function VerificationReport() {
     setVerifying(true);
     toast.loading('Vérification d\'échantillons...', { id: 'verify' });
 
-    const client = createApiClient(baseUrl, secretKey);
+    let apiRoot = baseUrl;
+    let instName = instanceName || '';
+    try {
+      const u = new URL(baseUrl);
+      apiRoot = u.origin;
+      if (!instName) instName = u.searchParams.get('Instance') || '';
+    } catch {}
+    const client = createApiClient(apiRoot, secretKey, instName);
     const results = [];
 
     // Pick 10 random customers

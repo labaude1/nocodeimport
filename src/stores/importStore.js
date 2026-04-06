@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const DEFAULT_SECRET_KEY = 'ncb_12eddbee0c85468ca9871cb2517c7b4d5e7bbe99f0e4fa4e';
+const DEFAULT_SECRET_KEY = 'e2871fe4f3d7a7f2af5f58a973db58942ce304633dd001efc281d1164890';
+const DEFAULT_INSTANCE = '44716_e_commerce_order_import';
+const DEFAULT_API_ROOT = 'https://api.nocodebackend.com';
 
 const initialPhaseStats = () => ({
   total: 0,
@@ -25,7 +27,8 @@ export const useImportStore = create(
   persist(
     (set, get) => ({
       // --- Config ---
-      baseUrl: '',
+      baseUrl: DEFAULT_API_ROOT,
+      instanceName: DEFAULT_INSTANCE,
       secretKey: DEFAULT_SECRET_KEY,
       connectionStatus: null, // null | 'testing' | 'ok' | 'error'
       connectionMessage: '',
@@ -70,6 +73,12 @@ export const useImportStore = create(
 
       // --- Actions ---
       setConfig: (baseUrl, secretKey) => set({ baseUrl, secretKey }),
+      setInstanceName: (instanceName) => set({ instanceName }),
+      setFullConfig: (apiRoot, instanceName, secretKey) => set({
+        baseUrl: apiRoot,
+        instanceName,
+        secretKey,
+      }),
 
       setConnectionStatus: (status, message = '') =>
         set({ connectionStatus: status, connectionMessage: message }),
@@ -219,6 +228,7 @@ export const useImportStore = create(
       // Only persist config and settings, not the file or engine ref
       partialize: (state) => ({
         baseUrl: state.baseUrl,
+        instanceName: state.instanceName,
         secretKey: state.secretKey,
         concurrency: state.concurrency,
         delay: state.delay,

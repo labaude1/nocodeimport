@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 export default function ImportDashboard() {
   const store = useImportStore();
   const {
-    baseUrl, secretKey, file, fileSize,
+    baseUrl, instanceName, secretKey, file, fileSize,
     concurrency, delay, dryRun,
     importStatus, parseProgress, progress, currentPhase,
     logs, errors,
@@ -52,7 +52,15 @@ export default function ImportDashboard() {
     startTimer();
     setImportStatus('parsing');
 
-    const apiClient = createApiClient(baseUrl, secretKey);
+    // Parse baseUrl: it may be 'https://api.nocodebackend.com' or contain ?Instance=
+    let apiRoot = baseUrl;
+    let instName = instanceName || '';
+    try {
+      const u = new URL(baseUrl);
+      apiRoot = u.origin;
+      if (!instName) instName = u.searchParams.get('Instance') || '';
+    } catch {}
+    const apiClient = createApiClient(apiRoot, secretKey, instName);
 
     const engine = createImportEngine(apiClient, {
       onParseProgress: (data) => {

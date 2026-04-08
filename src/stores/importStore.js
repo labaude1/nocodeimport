@@ -44,9 +44,10 @@ export const useImportStore = create(
       preview: null, // { customers, orders, products, sampleCustomers }
 
       // --- Import settings ---
-      concurrency: 3,
-      delay: 100,
+      concurrency: 1, // Default 1 for Tier 1 (20 req/10s)
+      delay: 500, // Default 500ms = 2 req/s max (Tier 1 safe)
       dryRun: false,
+      skipDuplicates: true, // Default: check and skip existing records
 
       // --- Import state ---
       importStatus: 'idle', // 'idle' | 'parsing' | 'inserting' | 'paused' | 'done' | 'cancelled'
@@ -105,6 +106,7 @@ export const useImportStore = create(
       setConcurrency: (n) => set({ concurrency: n }),
       setDelay: (n) => set({ delay: n }),
       setDryRun: (v) => set({ dryRun: v }),
+      setSkipDuplicates: (v) => set({ skipDuplicates: v }),
 
       setImportStatus: (status) => set({ importStatus: status }),
       setCurrentPhase: (phase) => set({ currentPhase: phase }),

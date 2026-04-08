@@ -18,10 +18,10 @@ export default function ImportDashboard() {
   const store = useImportStore();
   const {
     baseUrl, instanceName, secretKey, file, fileSize,
-    concurrency, delay, dryRun,
+    concurrency, delay, dryRun, skipDuplicates,
     importStatus, parseProgress, progress, currentPhase,
     logs, errors,
-    setConcurrency, setDelay, setDryRun,
+    setConcurrency, setDelay, setDryRun, setSkipDuplicates,
     setImportStatus, setCurrentPhase,
     updateParseProgress, initPhase, updatePhaseProgress, setPhaseComplete,
     startTimer, tickTimer,
@@ -124,13 +124,13 @@ export default function ImportDashboard() {
     setEngineRef(engine);
 
     try {
-      await engine.run(file, { concurrency, delay, dryRun });
+      await engine.run(file, { concurrency, delay, dryRun, skipDuplicates });
     } catch (e) {
       addLog({ type: 'error', message: `Erreur fatale : ${e.message}` });
       setImportStatus('idle');
       toast.error('Erreur fatale : ' + e.message);
     }
-  }, [file, baseUrl, secretKey, concurrency, delay, dryRun]);
+  }, [file, baseUrl, secretKey, concurrency, delay, dryRun, skipDuplicates]);
 
   const handlePause = () => {
     if (engineRef) {
@@ -260,6 +260,21 @@ export default function ImportDashboard() {
                 B — Paramètres d'import
               </h2>
 
+              {/* Tier 1 Warning */}
+              <div className="mb-4 p-3 bg-[#78350f]/20 border border-[#fbbf24]/30 rounded-xl">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-[#fbbf24] flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-[#fbbf24]">
+                    <p className="font-semibold mb-1">Nocodebackend Tier 1</p>
+                    <p className="text-[#86a886]">
+                      Limite : <strong>20 req/10s</strong> (≈2 req/sec)<br />
+                      Recommandé : Concurrence=1, Délai=500ms<br />
+                      Toujours activer "Ignorer les doublons"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Concurrency */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
@@ -293,7 +308,7 @@ export default function ImportDashboard() {
               </div>
 
               {/* Dry Run toggle */}
-              <div className="flex items-center justify-between mb-5 p-3 bg-[#0d1a0d] rounded-xl border border-[#1f361f]">
+              <div className="flex items-center justify-between mb-3 p-3 bg-[#0d1a0d] rounded-xl border border-[#1f361f]">
                 <div className="flex items-center gap-2">
                   <FlaskConical className="w-4 h-4 text-[#60a5fa]" />
                   <div>
@@ -310,6 +325,27 @@ export default function ImportDashboard() {
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform
                     ${dryRun ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+
+              {/* Skip Duplicates toggle */}
+              <div className="flex items-center justify-between mb-5 p-3 bg-[#0d1a0d] rounded-xl border border-[#1f361f]">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-[#fbbf24]" />
+                  <div>
+                    <p className="text-xs font-medium text-[#e2f0e2]">Ignorer les doublons</p>
+                    <p className="text-xs text-[#4d6b4d]">Vérifie et ignore les clients existants</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSkipDuplicates(!skipDuplicates)}
+                  disabled={isRunning}
+                  className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0
+                    ${skipDuplicates ? 'bg-[#16a34a]' : 'bg-[#1f361f]'}
+                    disabled:opacity-50`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform
+                    ${skipDuplicates ? 'translate-x-4' : 'translate-x-0.5'}`} />
                 </button>
               </div>
 
